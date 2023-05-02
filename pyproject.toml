@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lockss-soap"
-version = "0.8.0-dev1"
+version = "0.8.0-dev2"
 description = "Library and command line tools to interact with legacy LOCKSS SOAP interfaces"
 license = "BSD-3-Clause"
 authors = [
@@ -32,7 +32,7 @@ tabulate = "^0.9.0"
 zeep = "^4.2.1"
 
 [tool.poetry.scripts]
-daemonstatusservice = 'lockss.soap.daemon_status_service:main'
+daemonstatusservice = 'lockss.soap.cli:daemon_status_service'
 
 [build-system]
 requires = ["poetry-core"]
