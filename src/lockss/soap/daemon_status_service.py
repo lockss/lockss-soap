@@ -33,7 +33,6 @@ import zeep.helpers
 
 from lockss.soap.util import _construct_query, _make_client
 
-
 SERVICE = 'DaemonStatusService'
 
 
@@ -43,6 +42,51 @@ def get_au_article_urls(node_object, auid):
 
 
 def get_au_status(node_object, auid):
+    """
+    Performs a ``getAuStatus`` operation on the given node for the given AUID,
+    and returns a record with these fields (or ``None`` if
+    :exc:`zeep.exceptions.Fault` with ``No Archival Unit with provided
+    identifier`` is raised):
+
+    *  ``accessType`` (string)
+    *  ``availableFromPublisher`` (boolean)
+    *  ``contentSize`` (numeric)
+    *  ``crawlPool`` (string)
+    *  ``crawlProxy`` (string)
+    *  ``crawlWindow`` (string)
+    *  ``creationTime`` (numeric)
+    *  ``currentlyCrawling`` (boolean)
+    *  ``currentlyPolling`` (boolean)
+    *  ``diskUsage`` (numeric)
+    *  ``journalTitle`` (string)
+    *  ``lastCompletedCrawl`` (numeric)
+    *  ``lastCompletedDeepCrawl`` (numeric)
+    *  ``lastCompletedDeepCrawlDepth`` (numeric)
+    *  ``lastCompletedPoll`` (numeric)
+    *  ``lastCrawl`` (numeric)
+    *  ``lastCrawlResult`` (string)
+    *  ``lastDeepCrawl`` (numeric)
+    *  ``lastDeepCrawlResult`` (string)
+    *  ``lastMetadataIndex`` (numeric)
+    *  ``lastPoll`` (numeric)
+    *  ``lastPollResult`` (string)
+    *  ``pluginName`` (string)
+    *  ``provider`` (string)
+    *  ``publisher`` (string)
+    *  ``publishingPlatform`` (string)
+    *  ``recentPollAgreement`` (floating point)
+    *  ``repository`` (string)
+    *  ``status`` (string)
+    *  ``subscriptionStatus`` (string)
+    *  ``substanceState`` (string)
+    *  ``volume`` (string) (the AU name)
+    *  ``year`` (string)
+
+    :param node_object: A Node object
+    :param auid: An AUID
+    :return: An object (with attributes described above), or ``None`` if there
+        is no such AUID on the node.
+    """
     try:
         client = _make_client(node_object, SERVICE)
         ret = client.service.getAuStatus(auId=auid)
