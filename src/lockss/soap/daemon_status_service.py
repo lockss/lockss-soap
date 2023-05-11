@@ -122,7 +122,6 @@ def get_au_substance_urls(node_object, auid):
     :param auid: An AUID.
     :return: A list of substance URLs, or ``None`` if there is no matching
         AUID.
-
     """
     res = query_aus(node_object, ['substanceUrls'], where=f'auId = "{auid}"')
     return res[0].get('substanceUrls', []) if len(res) > 0 else None
@@ -200,8 +199,8 @@ def get_peer_agreements(node_object, auid):
     Retrieves the given AU's peer agreements data on the given node, in the
     form of a record with these attributes:
 
-    *  ``agreements``, a record with these fields:
-       *  ``entry``, a list of records with these fields:
+    *  ``agreements``, a record with these attributes:
+       *  ``entry``, a list of records with these attributes:
           *  ``key``, a string among:
              *  ``POR``
              *  ``POP``
@@ -219,7 +218,7 @@ def get_peer_agreements(node_object, auid):
              *  ``W_POP_HINT``
              *  ``W_SYMMETRIC_POR_HINT``
              *  ``W_SYMMETRIC_POP_HINT``
-          *  ``value``, a record with these fields:
+          *  ``value``, a record with these attributes:
              *  ``highestPercentAgreement`` (floating point)
              *  ``highestPercentAgreementTimestamp`` (numeric)
              *  ``percentAgreement`` (floating point)
@@ -248,7 +247,7 @@ def get_platform_configuration(node_object):
     *  ``buildTimestamp`` (numeric)
     *  ``currentTime`` (numeric)
     *  ``currentWorkingDirectory`` (string)
-    *  ``daemonVersion``, a record with these fields:
+    *  ``daemonVersion``, a record with these attributes:
        *  ``buildVersion`` (numeric)
        *  ``fullVersion`` (string)
        *  ``majorVersion`` (numeric)
@@ -257,13 +256,13 @@ def get_platform_configuration(node_object):
     *  ``groups`` (list of strings)
     *  ``hostName`` (string)
     *  ``ipAddress`` (string)
-    *  ``javaVersion``, a record with these fields:
+    *  ``javaVersion``, a record with these attributes:
        *  ``runtimeName`` (string)
        *  ``runtimeVersion`` (string)
        *  ``specificationVersion`` (string)
        *  ``version`` (string)
     *  ``mailRelay`` (string)
-    *  ``platform``, a record with these fields:
+    *  ``platform``, a record with these attributes:
        *  ``name`` (string)
        *  ``suffix`` (string)
        *  ``version`` (string)
@@ -300,15 +299,15 @@ def is_daemon_ready(node_object):
 def query_aus(node_object, select, where=None):
     """
     Performs a query against the AUs of a given node, and returns a record with
-    selected attributes among these:
+    attributes among these:
 
     *  ``accessType`` (string)
     *  ``articleUrls`` (list of strings)
-    *  ``auConfiguration``, a record with these fields:
-       *  ``defParams``, a list of records with these fields:
+    *  ``auConfiguration``, a record with these attributes:
+       *  ``defParams``, a list of records with these attributes:
           *  ``key`` (string)
           *  ``value`` (string)
-       *  ``nonDefParams``, a list of records with these fields:
+       *  ``nonDefParams``, a list of records with these attributes:
           *  ``key`` (string)
           *  ``value`` (string)
     *  ``auId`` (string)
@@ -337,9 +336,9 @@ def query_aus(node_object, select, where=None):
     *  ``lastPollResult`` (string)
     *  ``name`` (string)
     *  ``newContentCrawlUrls`` (list of strings)
-    *  ``peerAgreements``, a list of records with these fields:
-       *  ``agreements``, a record with these fields:
-          *  ``entry``, a list of records with these fields:
+    *  ``peerAgreements``, a list of records with these attributes:
+       *  ``agreements``, a record with these attributes:
+          *  ``entry``, a list of records with these attributes:
              *  ``key``, a string among:
                 *  ``POR``
                 *  ``POP``
@@ -357,7 +356,7 @@ def query_aus(node_object, select, where=None):
                 *  ``W_POP_HINT``
                 *  ``W_SYMMETRIC_POR_HINT``
                 *  ``W_SYMMETRIC_POP_HINT``
-             *  ``value``, a record with these fields:
+             *  ``value``, a record with these attributes:
                 *  ``highestPercentAgreement`` (floating point)
                 *  ``highestPercentAgreementTimestamp`` (numeric)
                 *  ``percentAgreement`` (floating point)
@@ -374,7 +373,7 @@ def query_aus(node_object, select, where=None):
     *  ``tdbPublisher`` (string)
     *  ``tdbYear`` (string)
     *  ``urlStems`` (list of strings)
-    *  ``urls``, a list of records with these fields:
+    *  ``urls``, a list of records with these attributes:
        *  ``currentVersionSize`` (numeric)
        *  ``pollWeight`` (floating point)
        *  ``url`` (string)
@@ -397,6 +396,48 @@ def query_aus(node_object, select, where=None):
 
 
 def query_crawls(node_object, select, where=None):
+    """
+    Performs a query against the crawls of a given node, and returns a record
+    with attributes among these:
+
+    *  ``auId`` (string)
+    *  ``auName`` (string)
+    *  ``bytesFetched`` (numeric)
+    *  ``crawlKey`` (string)
+    *  ``crawlStatus`` (string)
+    *  ``crawlType`` (string)
+    *  ``duration`` (numeric)
+    *  ``linkDepth`` (numeric)
+    *  ``mimeTypeCount`` (numeric)
+    *  ``mimeTypes`` (list of strings)
+    *  ``offSiteUrlsExcludedCount`` (numeric)
+    *  ``pagesExcluded`` (list of strings)
+    *  ``pagesExcludedCount`` (numeric)
+    *  ``pagesFetched`` (list of strings)
+    *  ``pagesFetchedCount`` (numeric)
+    *  ``pagesNotModified`` (list of strings)
+    *  ``pagesNotModifiedCount`` (numeric)
+    *  ``pagesParsed`` (list of strings)
+    *  ``pagesParsedCount`` (numeric)
+    *  ``pagesPending`` (list of strings)
+    *  ``pagesPendingCount`` (numeric)
+    *  ``pagesWithErrors`` (list of strings)
+    *  ``pagesWithErrorsCount`` (numeric)
+    *  ``priority`` (numeric)
+    *  ``refetchDepth`` (numeric)
+    *  ``sources`` (list of strings)
+    *  ``startTime`` (numeric)
+    *  ``startingUrls`` (list of strings)
+
+    Performs a ``queryCrawls`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param select: A list of attribute names, chosen among the ones above.
+    :param where: An optional query string expressed over the attribute names
+        above.
+    :return: A list of objects for crawls matching the ``where`` query, each
+        populated with only the attributes requested in the ``select`` list.
+    """
     client = _make_client(node_object, SERVICE)
     query = _construct_query(select, where)
     ret = client.service.queryCrawls(crawlQuery=query)
@@ -404,6 +445,76 @@ def query_crawls(node_object, select, where=None):
 
 
 def query_polls(node_object, select, where=None):
+    """
+    Performs a query against the crawls of a given node, and returns a record
+    with attributes among these:
+
+    *  ``activeRepairCount`` (numeric)
+    *  ``activeRepairs``, a list of records with these attributes:
+       *  ``peerId`` (string)
+       *  ``url`` (string)
+    *  ``additionalInfo`` (string)
+
+<xs:element maxOccurs="unbounded" minOccurs="0" name="activeRepairs" nillable="true" type="tns:repairWsResult"/>
+<xs:element minOccurs="0" name="additionalInfo" type="xs:string"/>
+<xs:element minOccurs="0" name="agreedUrlCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="agreedUrls" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="auId" type="xs:string"/>
+<xs:element minOccurs="0" name="auName" type="xs:string"/>
+<xs:element minOccurs="0" name="bytesHashedCount" type="xs:long"/>
+<xs:element minOccurs="0" name="bytesReadCount" type="xs:long"/>
+<xs:element minOccurs="0" name="completedRepairCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="completedRepairs" nillable="true" type="tns:repairWsResult"/>
+<xs:element minOccurs="0" name="deadline" type="xs:long"/>
+<xs:element minOccurs="0" name="disagreedUrlCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="disagreedUrls" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="duration" type="xs:long"/>
+<xs:element minOccurs="0" name="endTime" type="xs:long"/>
+<xs:element minOccurs="0" name="errorDetail" type="xs:string"/>
+<xs:element name="errorUrls">
+<xs:complexType>
+<xs:sequence>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
+<xs:complexType>
+<xs:sequence>
+<xs:element minOccurs="0" name="key" type="xs:string"/>
+<xs:element minOccurs="0" name="value" type="xs:string"/>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element minOccurs="0" name="hashErrorCount" type="xs:int"/>
+<xs:element minOccurs="0" name="noQuorumUrlCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="noQuorumUrls" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="participantCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="participants" nillable="true" type="tns:participantWsResult"/>
+<xs:element minOccurs="0" name="percentAgreement" type="xs:float"/>
+<xs:element minOccurs="0" name="pollKey" type="xs:string"/>
+<xs:element minOccurs="0" name="pollStatus" type="xs:string"/>
+<xs:element minOccurs="0" name="pollVariant" type="xs:string"/>
+<xs:element minOccurs="0" name="quorum" type="xs:int"/>
+<xs:element minOccurs="0" name="remainingTime" type="xs:long"/>
+<xs:element minOccurs="0" name="startTime" type="xs:long"/>
+<xs:element minOccurs="0" name="talliedUrlCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="talliedUrls" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="tooCloseUrlCount" type="xs:int"/>
+<xs:element maxOccurs="unbounded" minOccurs="0" name="tooCloseUrls" nillable="true" type="xs:string"/>
+<xs:element minOccurs="0" name="voteDeadline" type="xs:long"/>
+
+
+
+
+    Performs a ``queryPolls`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param select: A list of attribute names, chosen among the ones above.
+    :param where: An optional query string expressed over the attribute names
+        above.
+    :return: A list of objects for polls matching the ``where`` query, each
+        populated with only the attributes requested in the ``select`` list.
+    """
     client = _make_client(node_object, SERVICE)
     query = _construct_query(select, where)
     ret = client.service.queryPolls(pollQuery=query)
