@@ -185,13 +185,13 @@ class _BaseCli(object):
         return self._nodes
 
     def _get_password(self):
-        if self._args.password is None:
+        if not self._args.password:
             self._args.password = getpass.getpass('UI password: ')
         return self._args.password
 
     def _get_username(self):
-        if self._args.username is None:
-            self._args.username = input('UI username: ')
+        if not self._args.username:
+            self._args.username = getpass.getpass('UI username: ')
         return self._args.username
 
     def _license(self):
