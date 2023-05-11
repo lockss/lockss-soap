@@ -37,16 +37,24 @@ SERVICE = 'DaemonStatusService'
 
 
 def get_au_article_urls(node_object, auid):
+    """
+    Retrieves the given AU's article URLs on the given node.
+
+    Performs a `query_aus` operation selecting for ``articleUrls`` where
+    ``auId`` is the given AUID.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :return: A list of article URLs, or ``None`` if there is no matching AUID.
+    """
     res = query_aus(node_object, ['articleUrls'], where=f'auId = "{auid}"')
     return res[0].get('articleUrls', []) if len(res) > 0 else None
 
 
 def get_au_status(node_object, auid):
     """
-    Performs a ``getAuStatus`` operation on the given node for the given AUID,
-    and returns a record with these fields (or ``None`` if
-    :exc:`zeep.exceptions.Fault` with ``No Archival Unit with provided
-    identifier`` is raised):
+    Retrieves the given AU's status data from the given node, in the form of
+    a record with these attributes:
 
     *  ``accessType`` (string)
     *  ``availableFromPublisher`` (boolean)
@@ -82,10 +90,15 @@ def get_au_status(node_object, auid):
     *  ``volume`` (string) (the AU name)
     *  ``year`` (string)
 
-    :param node_object: A Node object
-    :param auid: An AUID
-    :return: An object (with attributes described above), or ``None`` if there
-        is no such AUID on the node.
+    Performs a ``getAuStatus`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :return: An object (with attributes described above), or ``None`` if
+        `zeep.exceptions.Fault` with ``No Archival Unit with provided
+        identifier`` was raised).
+    :raises zeep.exceptions.Fault: If a `zeep.exceptions.Fault` was raised
+        other than one with ``No Archival Unit with provided identifier``.
     """
     try:
         client = _make_client(node_object, SERVICE)
@@ -99,11 +112,41 @@ def get_au_status(node_object, auid):
 
 
 def get_au_substance_urls(node_object, auid):
+    """
+    Retrieves the given AU's substance URLs on the given node.
+
+    Performs a `query_aus` operation selecting for ``substanceUrls`` where
+    ``auId`` is the given AUID.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :return: A list of substance URLs, or ``None`` if there is no matching
+        AUID.
+
+    """
     res = query_aus(node_object, ['substanceUrls'], where=f'auId = "{auid}"')
     return res[0].get('substanceUrls', []) if len(res) > 0 else None
 
 
 def get_au_type_urls(node_object, auid, typ):
+    """
+    Retrieves the given AU's article or substance URLs on the given node,
+    depending on whether the ``typ`` parameter is ``articleUrls`` or
+    ``substanceUrls`` respectively.
+
+    .. warning::
+
+       This method will become deprecated in a future release. Use
+       `get_au_article_urls` or `get_au_substance_urls` instead.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :param typ: Either ``articleUrls`` for article URLs or ``substanceUrls``
+       for substance URLs.
+    :return: The result of `get_au_article_urls` for ``articleUrls`` or of
+        `get_au_substance_urls` for ``substanceUrls``.
+    :raises Exception: If ``typ`` is not ``articleUrls`` or ``substanceUrls``.
+    """
     if typ == 'articleUrls':
         return get_au_article_urls(node_object, auid)
     elif typ == 'substanceUrls':
@@ -113,6 +156,20 @@ def get_au_type_urls(node_object, auid, typ):
 
 
 def get_au_urls(node_object, auid, prefix=None):
+    """
+    Retrieves the given AU's list of URLs on the given node.
+
+    Performs a ``getAuUrls`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :param prefix: An optional prefix.
+    :return: The AU's list of URLs (only those beginning with ``prefix`` if
+        given), or ``None`` if `zeep.exceptions.Fault` with ``No Archival Unit
+        with provided identifier`` was raised.
+    :raises zeep.exceptions.Fault: If a `zeep.exceptions.Fault` was raised
+        other than one with ``No Archival Unit with provided identifier``.
+    """
     try:
         client = _make_client(node_object, SERVICE)
         ret = client.service.getAuUrls(auId=auid, url=prefix)
@@ -125,29 +182,214 @@ def get_au_urls(node_object, auid, prefix=None):
 
 
 def get_auids(node_object):
+    """
+    Retrieves the given node's list of AUIDs.
+
+    Performs a ``getAuIds`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :return: A list of AUIDs.
+    """
     client = _make_client(node_object, SERVICE)
     ret = client.service.getAuIds()
     return zeep.helpers.serialize_object(ret)
 
 
 def get_peer_agreements(node_object, auid):
+    """
+    Retrieves the given AU's peer agreements data on the given node, in the
+    form of a record with these attributes:
+
+    *  ``agreements``, a record with these fields:
+       *  ``entry``, a list of records with these fields:
+          *  ``key``, a string among:
+             *  ``POR``
+             *  ``POP``
+             *  ``SYMMETRIC_POR``
+             *  ``SYMMETRIC_POP``
+             *  ``POR_HINT``
+             *  ``POP_HINT``
+             *  ``SYMMETRIC_POR_HINT``
+             *  ``SYMMETRIC_POP_HINT``
+             *  ``W_POR``
+             *  ``W_POP``
+             *  ``W_SYMMETRIC_POR``
+             *  ``W_SYMMETRIC_POP``
+             *  ``W_POR_HINT``
+             *  ``W_POP_HINT``
+             *  ``W_SYMMETRIC_POR_HINT``
+             *  ``W_SYMMETRIC_POP_HINT``
+          *  ``value``, a record with these fields:
+             *  ``highestPercentAgreement`` (floating point)
+             *  ``highestPercentAgreementTimestamp`` (numeric)
+             *  ``percentAgreement`` (floating point)
+             *  ``percentAgreementTimestamp`` (numeric)
+    *  ``peerId`` (string)
+
+    Performs a `query_aus` operation selecting for ``peerAgreements`` where
+    `auId`` is the given AUID.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param auid: An AUID.
+    :return: An object (with attributes described above), or ``None`` if no
+        data is returned.
+    """
     res = query_aus(node_object, ['peerAgreements'], where=f'auId = "{auid}"')
     return zeep.helpers.serialize_object(res[0]).get('peerAgreements') if len(res) > 0 else None
 
 
 def get_platform_configuration(node_object):
+    """
+    Retrieves the given node's platform configuration data, in the form of a
+    record with these attributes:
+
+    *  ``adminEmail`` (string)
+    *  ``buildHost`` (string)
+    *  ``buildTimestamp`` (numeric)
+    *  ``currentTime`` (numeric)
+    *  ``currentWorkingDirectory`` (string)
+    *  ``daemonVersion``, a record with these fields:
+       *  ``buildVersion`` (numeric)
+       *  ``fullVersion`` (string)
+       *  ``majorVersion`` (numeric)
+       *  ``minorVersion`` (numeric)
+    *  ``disks`` (list of strings)
+    *  ``groups`` (list of strings)
+    *  ``hostName`` (string)
+    *  ``ipAddress`` (string)
+    *  ``javaVersion``, a record with these fields:
+       *  ``runtimeName`` (string)
+       *  ``runtimeVersion`` (string)
+       *  ``specificationVersion`` (string)
+       *  ``version`` (string)
+    *  ``mailRelay`` (string)
+    *  ``platform``, a record with these fields:
+       *  ``name`` (string)
+       *  ``suffix`` (string)
+       *  ``version`` (string)
+    *  ``project`` (string)
+    *  ``properties`` (list of strings)
+    *  ``uptime`` (numeric)
+    *  ``v3Identity`` (string)
+
+    Performs a ``getPlatformConfiguration`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :return: An object (with attributes described above).
+    """
     client = _make_client(node_object, SERVICE)
     ret = client.service.getPlatformConfiguration()
     return zeep.helpers.serialize_object(ret)
 
 
 def is_daemon_ready(node_object):
+    """
+    Returns the given node's ready flag.
+
+    Performs a ``isDaemonReady`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :return: The node's boolean ready flag.
+    :rtype: bool
+    """
     client = _make_client(node_object, SERVICE)
     ret = client.service.isDaemonReady()
     return ret
 
 
 def query_aus(node_object, select, where=None):
+    """
+    Performs a query against the AUs of a given node, and returns a record with
+    selected attributes among these:
+
+    *  ``accessType`` (string)
+    *  ``articleUrls`` (list of strings)
+    *  ``auConfiguration``, a record with these fields:
+       *  ``defParams``, a list of records with these fields:
+          *  ``key`` (string)
+          *  ``value`` (string)
+       *  ``nonDefParams``, a list of records with these fields:
+          *  ``key`` (string)
+          *  ``value`` (string)
+    *  ``auId`` (string)
+    *  ``availableFromPublisher`` (boolean)
+    *  ``contentSize`` (numeric)
+    *  ``crawlPool`` (string)
+    *  ``crawlProxy`` (string)
+    *  ``crawlWindow`` (string)
+    *  ``creationTime`` (numeric)
+    *  ``currentlyCrawling`` (boolean)
+    *  ``currentlyPolling`` (boolean)
+    *  ``diskUsage`` (numeric)
+    *  ``highestPollAgreement`` (numeric)
+    *  ``isBulkContent`` (boolean)
+    *  ``journalTitle`` (string)
+    *  ``lastCompletedCrawl`` (numeric)
+    *  ``lastCompletedDeepCrawl`` (numeric)
+    *  ``lastCompletedDeepCrawlDepth`` (numeric)
+    *  ``lastCompletedPoll`` (numeric)
+    *  ``lastCrawl`` (numeric)
+    *  ``lastCrawlResult`` (string)
+    *  ``lastDeepCrawl`` (numeric)
+    *  ``lastDeepCrawlResult`` (string)
+    *  ``lastMetadataIndex`` (numeric)
+    *  ``lastPoll`` (numeric)
+    *  ``lastPollResult`` (string)
+    *  ``name`` (string)
+    *  ``newContentCrawlUrls`` (list of strings)
+    *  ``peerAgreements``, a list of records with these fields:
+       *  ``agreements``, a record with these fields:
+          *  ``entry``, a list of records with these fields:
+             *  ``key``, a string among:
+                *  ``POR``
+                *  ``POP``
+                *  ``SYMMETRIC_POR``
+                *  ``SYMMETRIC_POP``
+                *  ``POR_HINT``
+                *  ``POP_HINT``
+                *  ``SYMMETRIC_POR_HINT``
+                *  ``SYMMETRIC_POP_HINT``
+                *  ``W_POR``
+                *  ``W_POP``
+                *  ``W_SYMMETRIC_POR``
+                *  ``W_SYMMETRIC_POP``
+                *  ``W_POR_HINT``
+                *  ``W_POP_HINT``
+                *  ``W_SYMMETRIC_POR_HINT``
+                *  ``W_SYMMETRIC_POP_HINT``
+             *  ``value``, a record with these fields:
+                *  ``highestPercentAgreement`` (floating point)
+                *  ``highestPercentAgreementTimestamp`` (numeric)
+                *  ``percentAgreement`` (floating point)
+                *  ``percentAgreementTimestamp`` (numeric)
+       *  ``peerId`` (string)
+    *  ``pluginName`` (string)
+    *  ``publishingPlatform`` (string)
+    *  ``recentPollAgreement`` (numeric)
+    *  ``repositoryPath`` (string)
+    *  ``status`` (string)
+    *  ``subscriptionStatus`` (string)
+    *  ``substanceState`` (string)
+    *  ``tdbProvider`` (string)
+    *  ``tdbPublisher`` (string)
+    *  ``tdbYear`` (string)
+    *  ``urlStems`` (list of strings)
+    *  ``urls``, a list of records with these fields:
+       *  ``currentVersionSize`` (numeric)
+       *  ``pollWeight`` (floating point)
+       *  ``url`` (string)
+       *  ``versionCount`` (numeric)
+    *  ``volume`` (string)
+
+    Performs a ``queryAus`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param select: A list of attribute names, chosen among the ones above.
+    :param where: An optional query string expressed over the attribute names
+        above.
+    :return: A list of objects for AUs matching the ``where`` query, each
+        populated with only the attributes requested in the ``select`` list.
+    """
     client = _make_client(node_object, SERVICE)
     query = _construct_query(select, where)
     ret = client.service.queryAus(auQuery=query)
@@ -169,4 +411,14 @@ def query_polls(node_object, select, where=None):
 
 
 def query_tdb_titles(*args, **kwargs):
+    """
+    .. warning::
+
+       This function is deprecated and will simply raise `NotImplementedError`.
+
+    :param args: Ignored positional arguments.
+    :param kwargs: Ignored keyword arguments.
+    :return: Always raises`NotImplementedError`.
+    :raises NotImplementedError: Always raises`NotImplementedError`.
+    """
     raise NotImplementedError('query_tdb_titles()')
