@@ -454,41 +454,31 @@ def query_polls(node_object, select, where=None):
        *  ``peerId`` (string)
        *  ``url`` (string)
     *  ``additionalInfo`` (string)
+    *  ``agreedUrlCount`` (numeric)
+    *  ``agreedUrls`` (list of strings)
+    *  ``auId`` (string)
+    *  ``auName`` (string)
+    *  ``bytesHashedCount`` (numeric)
+    *  ``bytesReadCount`` (numeric)
+    *  ``completedRepairCount`` (numeric)
+    *  ``completedRepairs``, a list of records with these attributes:
+       *  ``peerId`` (string)
+       *  ``url`` (string)
+    *  ``deadline`` (numeric)
+    *  ``disagreedUrlCount`` (numeric)
+    *  ``disagreedUrls`` (list of strings)
+    *  ``duration`` (numeric)
+    *  ``endTime`` (numeric)
+    *  ``errorDetail`` (string)
+    *  ``errorUrls``, a list of records with these attributes:
+       *  ``entry``, a record with these attributes:
+          *  ``key`` (string)
+          *  ``value`` (string)
+    *  ``hashErrorCount`` (numeric)
+    *  ``noQuorumUrlCount`` (numeric)
+    *  ``noQuorumUrls`` (list of strings)
+    *  ``participantCount`` (numeric)
 
-<xs:element maxOccurs="unbounded" minOccurs="0" name="activeRepairs" nillable="true" type="tns:repairWsResult"/>
-<xs:element minOccurs="0" name="additionalInfo" type="xs:string"/>
-<xs:element minOccurs="0" name="agreedUrlCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="agreedUrls" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="auId" type="xs:string"/>
-<xs:element minOccurs="0" name="auName" type="xs:string"/>
-<xs:element minOccurs="0" name="bytesHashedCount" type="xs:long"/>
-<xs:element minOccurs="0" name="bytesReadCount" type="xs:long"/>
-<xs:element minOccurs="0" name="completedRepairCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="completedRepairs" nillable="true" type="tns:repairWsResult"/>
-<xs:element minOccurs="0" name="deadline" type="xs:long"/>
-<xs:element minOccurs="0" name="disagreedUrlCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="disagreedUrls" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="duration" type="xs:long"/>
-<xs:element minOccurs="0" name="endTime" type="xs:long"/>
-<xs:element minOccurs="0" name="errorDetail" type="xs:string"/>
-<xs:element name="errorUrls">
-<xs:complexType>
-<xs:sequence>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="entry">
-<xs:complexType>
-<xs:sequence>
-<xs:element minOccurs="0" name="key" type="xs:string"/>
-<xs:element minOccurs="0" name="value" type="xs:string"/>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-</xs:sequence>
-</xs:complexType>
-</xs:element>
-<xs:element minOccurs="0" name="hashErrorCount" type="xs:int"/>
-<xs:element minOccurs="0" name="noQuorumUrlCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="noQuorumUrls" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="participantCount" type="xs:int"/>
 <xs:element maxOccurs="unbounded" minOccurs="0" name="participants" nillable="true" type="tns:participantWsResult"/>
 <xs:element minOccurs="0" name="percentAgreement" type="xs:float"/>
 <xs:element minOccurs="0" name="pollKey" type="xs:string"/>

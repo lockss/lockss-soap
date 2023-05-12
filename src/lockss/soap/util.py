@@ -189,10 +189,16 @@ class _BaseCli(object):
             self._args.password = getpass.getpass('UI password: ')
         return self._args.password
 
+    def _get_skip_headers(self):
+        return self._args.skip_headers
+
     def _get_username(self):
         if not self._args.username:
             self._args.username = getpass.getpass('UI username: ')
         return self._args.username
+
+    def _get_verbose(self):
+        return self._args.verbose
 
     def _license(self):
         print(lockss.soap.__license__)
@@ -203,11 +209,14 @@ class _BaseCli(object):
                                help='print the result of parsing command line arguments')
 
     def _make_option_output_format(self, container):
-        container.add_argument('--output-format',
+        container.add_argument('--output-format', '-f',
                                metavar='FMT',
                                choices=tabulate.tabulate_formats,
                                default='simple',
                                help='set tabular output format to %(metavar)s (default: %(default)s; choices: %(choices)s)')
+        container.add_argument('--skip-headers',
+                               action='store_true',
+                               help='skip tabular output headers')
 
     def _make_option_verbose(self, container):
         container.add_argument('--verbose', '-v',

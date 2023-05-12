@@ -252,8 +252,9 @@ class DaemonStatusServiceCli(_BaseCli):
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
+        headers = [] if self._get_skip_headers() else ['AUID', *[f'{node_object}\n{AU_STATUS[field][0]}' for node_object, field in itertools.product(node_objects, fields)]]
         print(tabulate.tabulate([[auid, *[data.get((node_object, auid, field)) for node_object, field in itertools.product(node_objects, fields)]] for auid in sorted(auids)],
-                                headers=['AUID', *[f'{node_object}\n{AU_STATUS[field][0]}' for node_object, field in itertools.product(node_objects, fields)]],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
     def _get_au_urls(self):
@@ -268,8 +269,9 @@ class DaemonStatusServiceCli(_BaseCli):
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
+        headers = [] if self._get_skip_headers() else ['AUID', *[node_object for node_object in node_objects]]
         print(tabulate.tabulate([[auid, *['\n'.join(data.get((node_object, auid), [])) for node_object in node_objects]] for auid in sorted(auids)],
-                                headers=['AUID', *[node_object for node_object in node_objects]],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
     def _get_auids(self):
@@ -297,8 +299,9 @@ class DaemonStatusServiceCli(_BaseCli):
             not self._args.process_pool,
             self._args.pool_size)
         names = self._args.names
+        headers = [] if self._get_skip_headers() else [*(['AUID', 'AU Name'] if names else ['AUID']), *[node_object for node_object in node_objects]]
         print(tabulate.tabulate([[*([auid, name] if names else [auid]), *[data.get((node_object, auid), False) for node_object in node_objects]] for auid, name in sorted(all_auids.items())],
-                                headers=[*(['AUID', 'AU Name'] if names else ['AUID']), *[node_object for node_object in node_objects]],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
     def _get_platform_configuration(self):
@@ -314,8 +317,9 @@ class DaemonStatusServiceCli(_BaseCli):
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
+        headers = [] if self._get_skip_headers() else ['Field', *[node_object.get_url() for node_object in node_objects]]
         print(tabulate.tabulate([[PLATFORM_CONFIGURATION[field][0], *[data.get((node_object, field)) for node_object in node_objects]] for field in fields],
-                                headers=['Field', *[node_object.get_url() for node_object in node_objects]],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
     def _handle_exception(self, tup, exc):
@@ -336,8 +340,9 @@ class DaemonStatusServiceCli(_BaseCli):
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
+        headers = [] if self._get_skip_headers() else ['Node', 'Ready']
         print(tabulate.tabulate([[node_object, data.get(node_object)] for node_object in node_objects],
-                                headers=['Node', 'Ready'],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
     def _make_option_names(self, container):
@@ -510,8 +515,9 @@ class DaemonStatusServiceCli(_BaseCli):
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
+        headers = [] if self._get_skip_headers() else ['AUID', *[f'{node_object}\n{query_mapping[field][0]}' for node_object, field in itertools.product(node_objects, requested_fields)]]
         print(tabulate.tabulate([[auid, *[data.get((node_object, auid, field)) for node_object, field in itertools.product(node_objects, requested_fields)]] for auid in sorted(all_auids)],
-                                headers=['AUID', *[f'{node_object}\n{query_mapping[field][0]}' for node_object, field in itertools.product(node_objects, requested_fields)]],
+                                headers=headers,
                                 tablefmt=self._args.output_format))
 
 

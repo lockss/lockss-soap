@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lockss-soap"
-version = "0.8.0-dev3"
+version = "0.8.0-dev4"
 description = "Library and command line tools to interact with legacy LOCKSS SOAP interfaces"
 license = "BSD-3-Clause"
 authors = [
