@@ -235,7 +235,7 @@ QUERY_REPOSITORIES = {
     'directoryName': ('Directory', lambda r: r.get('directoryName')),
     'diskUsage': ('Disk Usage', lambda r: r.get('diskUsage')),
     'internal': ('Internal', lambda r: r.get('internal')),
-    'params': ('Params', lambda r: f'{{{", ".join(f"{e.key}={e.value}" for e in r.get("params", []))}}}'),
+    'params': ('Params', lambda r: f'{{{", ".join(f"{e.get('key')}={e.get('value')}" for e in r.get("params", {}).get("entry", []))}}}'),
     'pluginName': ('Plugin Name', lambda r: r.get('pluginName')),
     'repositorySpaceId': ('Repository Space ID', lambda r: r.get('repositorySpaceId')),
     'status': ('Status', lambda r: r.get('status')),
