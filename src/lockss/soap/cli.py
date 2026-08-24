@@ -230,6 +230,17 @@ QUERY_POLLS = {
 }
 
 
+QUERY_REPOSITORIES = {
+    'auName': ('AU Name', lambda r: r.get('auName')),
+    'directoryName': ('Directory', lambda r: r.get('directoryName')),
+    'diskUsage': ('Disk Usage', lambda r: r.get('diskUsage')),
+    'internal': ('Internal', lambda r: r.get('internal')),
+    'params': ('Params', lambda r: f'{{{", ".join(f"{e.key}={e.value}" for e in r.get("params", []))}}}'),
+    'pluginName': ('Plugin Name', lambda r: r.get('pluginName')),
+    'repositorySpaceId': ('Repository Space ID', lambda r: r.get('repositorySpaceId')),
+    'status': ('Status', lambda r: r.get('status')),
+}
+
 class DaemonStatusServiceCli(_BaseCli):
 
     PROG = 'daemonstatusservice'
@@ -398,6 +409,7 @@ class DaemonStatusServiceCli(_BaseCli):
         self._make_parser_query_aus(self._subparsers)
         self._make_parser_query_crawls(self._subparsers)
         self._make_parser_query_polls(self._subparsers)
+        self._make_parser_query_repositories(self._subparsers)
         self._make_parser_usage(self._subparsers)
         self._make_parser_version(self._subparsers)
 
@@ -456,7 +468,7 @@ class DaemonStatusServiceCli(_BaseCli):
         self._make_options_nodes(parser)
         self._make_options_job_pool(parser)
 
-    def _make_parser_query(self, container, option, aliases, description, help, target, query_mapping):
+    def _make_parser_query(self, container, option, aliases, description, help, target, query_mapping, major_key='auId', major_label='AUID'):
         parser = container.add_parser(option, aliases=aliases,
                                       description=description,
                                       help=help,
@@ -464,6 +476,8 @@ class DaemonStatusServiceCli(_BaseCli):
         parser.set_defaults(fun=self._do_query)
         parser.set_defaults(target=target)
         parser.set_defaults(query_mapping=query_mapping)
+        parser.set_defaults(major_key=major_key)
+        parser.set_defaults(major_label=major_label)
         self._make_option_output_format(parser)
         self._make_options_nodes(parser)
         self._make_options_query(parser, query_mapping.keys())
@@ -494,29 +508,41 @@ class DaemonStatusServiceCli(_BaseCli):
                                          target=lockss.soap.daemon_status_service.query_polls,
                                          query_mapping=QUERY_POLLS)
 
+    def _make_parser_query_repositories(self, container):
+        parser = self._make_parser_query(container,
+                                         'query-repositories', aliases=['qr'],
+                                         description='Perform a query on repositories.',
+                                         help='perform a query on repositories',
+                                         target=lockss.soap.daemon_status_service.query_repositories,
+                                         query_mapping=QUERY_REPOSITORIES,
+                                         major_key='directoryName',
+                                         major_label='Directory')
+
     def _do_query(self):
         target = self._args.target
         query_mapping = self._args.query_mapping
+        major_key = self._args.major_key
+        major_label = self._args.major_label
         node_objects = [lockss.soap.node(node_ref, self._get_username(), self._get_password()) for node_ref in self._get_nodes()]
         requested_fields = self._args.select if self._args.select and len(self._args.select) > 0 else query_mapping.keys()
-        select_minus_auid = list(dict.fromkeys(k.partition(':')[0] for k in requested_fields if k != 'auId'))
-        select_auid_first = ['auId', *select_minus_auid]
+        select_minus_major = list(dict.fromkeys(k.partition(':')[0] for k in requested_fields if k != 'auId'))
+        select_major_first = [major_key, *select_minus_major]
         where = self._args.where
-        data, all_auids = dict(), set()
+        data, all_majors = dict(), set()
         def __result_func(t, r):
             for row in r:
-                auid = row['auId']
-                all_auids.add(auid)
+                major = row[major_key]
+                all_majors.add(major)
                 for field in requested_fields:
-                    data[(t[0], auid, field)] = query_mapping[field][1](row)
+                    data[(t[0], major, field)] = query_mapping[field][1](row)
         _do(target,
-            [(node_object, select_auid_first, where) for node_object in node_objects],
+            [(node_object, select_major_first, where) for node_object in node_objects],
             __result_func,
             self._handle_exception,
             not self._args.process_pool,
             self._args.pool_size)
-        headers = [] if self._get_skip_headers() else ['AUID', *[f'{node_object}\n{query_mapping[field][0]}' for node_object, field in itertools.product(node_objects, requested_fields)]]
-        print(tabulate.tabulate([[auid, *[data.get((node_object, auid, field)) for node_object, field in itertools.product(node_objects, requested_fields)]] for auid in sorted(all_auids)],
+        headers = [] if self._get_skip_headers() else [major_label, *[f'{node_object}\n{query_mapping[field][0]}' for node_object, field in itertools.product(node_objects, requested_fields)]]
+        print(tabulate.tabulate([[major, *[data.get((node_object, major, field)) for node_object, field in itertools.product(node_objects, requested_fields)]] for major in sorted(all_majors)],
                                 headers=headers,
                                 tablefmt=self._args.output_format))
 

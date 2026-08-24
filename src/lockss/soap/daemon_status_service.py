@@ -470,31 +470,44 @@ def query_polls(node_object, select, where=None):
     *  ``duration`` (numeric)
     *  ``endTime`` (numeric)
     *  ``errorDetail`` (string)
-    *  ``errorUrls``, a list of records with these attributes:
-       *  ``entry``, a record with these attributes:
+    *  ``errorUrls``, a record with these attributes:
+       *  ``entry``, a list of records with these attributes:
           *  ``key`` (string)
           *  ``value`` (string)
     *  ``hashErrorCount`` (numeric)
     *  ``noQuorumUrlCount`` (numeric)
     *  ``noQuorumUrls`` (list of strings)
     *  ``participantCount`` (numeric)
-
-<xs:element maxOccurs="unbounded" minOccurs="0" name="participants" nillable="true" type="tns:participantWsResult"/>
-<xs:element minOccurs="0" name="percentAgreement" type="xs:float"/>
-<xs:element minOccurs="0" name="pollKey" type="xs:string"/>
-<xs:element minOccurs="0" name="pollStatus" type="xs:string"/>
-<xs:element minOccurs="0" name="pollVariant" type="xs:string"/>
-<xs:element minOccurs="0" name="quorum" type="xs:int"/>
-<xs:element minOccurs="0" name="remainingTime" type="xs:long"/>
-<xs:element minOccurs="0" name="startTime" type="xs:long"/>
-<xs:element minOccurs="0" name="talliedUrlCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="talliedUrls" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="tooCloseUrlCount" type="xs:int"/>
-<xs:element maxOccurs="unbounded" minOccurs="0" name="tooCloseUrls" nillable="true" type="xs:string"/>
-<xs:element minOccurs="0" name="voteDeadline" type="xs:long"/>
-
-
-
+    *  ``participants``, a list of records with these attributes:
+       *  ``agreedUrls`` (list of strings)
+       *  ``agreedVoteCount`` (numeric)
+       *  ``bytesHashed`` (numeric)
+       *  ``bytesRead`` (numeric)
+       *  ``currentState`` (string)
+       *  ``disagreedUrls`` (list of strings)
+       *  ``disagreedVoteCount`` (numeric)
+       *  ``hasVoted`` (boolean)
+       *  ``isExParticipant`` (boolean)
+       *  ``lastStateChange`` (numeric)
+       *  ``peerId`` (string)
+       *  ``peerStatus`` (string)
+       *  ``percentAgreement`` (floating point)
+       *  ``pollerOnlyUrls`` (list of strings)
+       *  ``pollerOnlyVoteCount`` (numeric)
+       *  ``voterOnlyUrls`` (list of strings)
+       *  ``voterOnlyVotecount`` (numeric)
+    *  ``percentAgreement`` (floating point)
+    *  ``pollKey`` (string)
+    *  ``pollStatus`` (string)
+    *  ``pollVariant`` (string)
+    *  ``quorum`` (numeric)
+    *  ``remainingTime`` (numeric)
+    *  ``startTime`` (numeric)
+    *  ``talliedUrlCount`` (numeric)
+    *  ``talliedUrls`` (list of strings)
+    *  ``tooCloseUrlCount`` (numeric)
+    *  ``tooCloseUrls`` (list of strings)
+    *  ``voteDeadline`` (numeric)
 
     Performs a ``queryPolls`` SOAP operation.
 
@@ -508,6 +521,35 @@ def query_polls(node_object, select, where=None):
     client = _make_client(node_object, SERVICE)
     query = _construct_query(select, where)
     ret = client.service.queryPolls(pollQuery=query)
+    return zeep.helpers.serialize_object(ret)
+
+
+def query_repositories(node_object, select, where=None):
+    """
+    Performs a query against the repositories of a given node, and returns a
+    record with attributes among these:
+
+    *  ``auName`` (string)
+    *  ``directoryName`` (string)
+    *  ``diskUsage`` (numeric)
+    *  ``internal`` (boolean)
+    *  ``params`` (string)
+    *  ``pluginName`` (string)
+    *  ``repositorySpaceId`` (string)
+    *  ``status`` (string)
+
+    Performs a ``queryRepositories`` SOAP operation.
+
+    :param node_object: A node object returned by `lockss.soap.node`.
+    :param select: A list of attribute names, chosen among the ones above.
+    :param where: An optional query string expressed over the attribute names
+        above.
+    :return: A list of objects for polls matching the ``where`` query, each
+        populated with only the attributes requested in the ``select`` list.
+    """
+    client = _make_client(node_object, SERVICE)
+    query = _construct_query(select, where)
+    ret = client.service.queryRepositories(repositoryQuery=query)
     return zeep.helpers.serialize_object(ret)
 
 

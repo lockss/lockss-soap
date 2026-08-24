@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-__version__ = '0.8.0-dev4'
+__version__ = '0.8.0-dev6'
 
 __copyright__ = '''
 Copyright (c) 2000-2023, Board of Trustees of Leland Stanford Jr. University
@@ -68,14 +68,31 @@ import lockss.soap.util
 
 
 def node(node_reference, username, password):
+    """
+    Creates a node object from a node reference (a string like ``host:8081``,
+    ``http://host:8081``, ``http://host:8081/``, ``https://host:8081``,
+    ``https://host:8081/``; no protocol defaults to ``http://``), a username,
+    and a password.
+
+    .. seealso::
+
+    :param node_reference: A node reference.
+    :param username: A username.
+    :param password: A password.
+    :return: A node object.
+    """
     return _Node(node_reference, username, password)
 
 
 class _Node(object):
+    """
+    Encapsulates a node reference.
+    """
 
     DEFAULT_PROTOCOL = 'http'
 
     def __init__(self, node_reference, username, password):
+
         super().__init__()
         if '://' not in node_reference:
             node_reference = f'{_Node.DEFAULT_PROTOCOL}://{node_reference}'
